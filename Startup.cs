@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using tictactoe_service.Configuration;
 using tictactoe_service.CQRS.Shared;
 using tictactoe_service.Data;
 using tictactoe_service.Logic;
@@ -24,7 +25,7 @@ namespace tictactoe_service
     {
 
         // CORS
-        readonly string MyAllowSpecificOrigins = "_myAllowTicTacToeOrigins";
+        readonly static string MyAllowSpecificOrigins = "_myAllowTicTacToeOrigins";
 
         public Startup(IConfiguration configuration)
         {
@@ -34,7 +35,21 @@ namespace tictactoe_service
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
+
         public void ConfigureServices(IServiceCollection services)
+        {
+            GlobalConfigureServices(services, Configuration);
+            services.AddSingleton<AWSDynamoConfig>(ctx => {
+                var config = ctx.GetRequiredService<IConfiguration>();
+                var strAccessKey = config["AWS:AccessKey"];
+                var strSecretKey = config["AWS:SecretKey"];
+                var strRegion = config["AWS:Region"];
+                var strTable = config["AWS:Table"];
+                return new AWSDynamoConfig { Region = strRegion, AccessKey = strAccessKey, SecretKey = strSecretKey, Table = strTable };
+            });
+        }
+
+        public static void GlobalConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
             services.AddControllers().AddNewtonsoftJson();  //Using newtonJson for better compatability
             services.AddOptions();
@@ -67,14 +82,9 @@ namespace tictactoe_service
             //services.AddSingleton<IRepository, InMemoryRepository>();
             services.AddSingleton<IRepository, DynamoDbRepository>();
 
-            //services.AddDefaultAWSOptions(Configuration.GetAWSOptions());
-            //services.AddAWSService<IAmazonDynamoDB>();
             services.AddSingleton<AmazonDynamoDBClient>(ctx => {
-                var config = ctx.GetRequiredService<IConfiguration>();
-                var strAccessKey = config["AWS:AccessKey"];
-                var strSecretKey = config["AWS:SecretKey"];
-                var strRegion = config["AWS:Region"];
-                AmazonDynamoDBClient awsDbClient = new AmazonDynamoDBClient(strAccessKey, strSecretKey, Amazon.RegionEndpoint.GetBySystemName(strRegion));
+                var config = ctx.GetRequiredService<AWSDynamoConfig>();
+                AmazonDynamoDBClient awsDbClient = new AmazonDynamoDBClient(config.AccessKey, config.SecretKey, Amazon.RegionEndpoint.GetBySystemName(config.Region));
                 return awsDbClient;
             });
 

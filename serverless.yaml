@@ -1,0 +1,71 @@
+﻿
+service: tictactoe-game-service
+
+provider:
+  name: aws
+  runtime: dotnetcore3.1
+  region: us-west-1
+
+# you can overwrite defaults here
+#  stage: dev
+
+# you can define service wide environment variables here
+  environment:
+    Dynamo_AccessKey: "<your-key>"
+    Dynamo_SecretKey: "<your-secret>"
+    Dynamo_Region: us-west-1
+    Dynamo_Table: TicTacToeGameCatalog
+
+package:
+  artifact: bin/Release/netcoreapp3.1/ticktactoe_service.zip
+
+functions:
+  getList:
+    handler: tictactoe_service::tictactoe_service.Lambda.Functions::GetList
+    events:
+      - http:
+          path: games
+          method: get
+          cors: true
+
+  getById:
+    handler: tictactoe_service::tictactoe_service.Lambda.Functions::GetById
+    events:
+      - http:
+          path: games/{id}
+          method: get
+          cors: true
+
+  createNew:
+    handler: tictactoe_service::tictactoe_service.Lambda.Functions::CreateNew
+    events:
+      - http:
+          path: games
+          method: post
+          cors: true
+
+  updateById:
+    handler: tictactoe_service::tictactoe_service.Lambda.Functions::UpdateById
+    events:
+      - http:
+          path: games/{id}
+          method: put
+          cors: true
+
+resources:
+  Resources:
+    ItemsDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.Dynamo_Table}
+

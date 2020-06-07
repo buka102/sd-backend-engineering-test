@@ -66,7 +66,7 @@ namespace tictactoe_service.Controllers
 
             var newGame = await _mediator.Send(new StartGameRequest {}, cancellationToken);
 
-            return newGame.JsonResult();
+            return newGame.JsonResult(System.Net.HttpStatusCode.Created);
 
         }
     }

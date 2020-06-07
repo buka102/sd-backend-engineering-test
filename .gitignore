@@ -2,4 +2,6 @@ obj
 bin
 .vs
 .user
+.DS_Store
+.serverless
 

@@ -12,6 +12,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using tictactoe_service.Configuration;
 using tictactoe_service.Models;
 
 namespace tictactoe_service.Data
@@ -20,16 +21,16 @@ namespace tictactoe_service.Data
     {
         private ILogger<DynamoDbRepository> _logger;
         private AmazonDynamoDBClient _dbClient;
-        private IConfiguration _configuration;
+        private AWSDynamoConfig _configuration;
         private Table _table;
         private readonly string _tableName;
 
-        public DynamoDbRepository(IConfiguration configuration, AmazonDynamoDBClient dbClient, ILogger<DynamoDbRepository> logger)
+        public DynamoDbRepository(AWSDynamoConfig configuration, AmazonDynamoDBClient dbClient, ILogger<DynamoDbRepository> logger)
         {
             _logger = logger;
             _dbClient = dbClient;
             _configuration = configuration;
-            _tableName = _configuration["AWS:Table"];
+            _tableName = _configuration.Table;
         }
 
         private Table GameCatalog
@@ -89,63 +90,6 @@ namespace tictactoe_service.Data
             {
                 return null;
             }
-
-
-
-
-
-
-
-
-
-
-
-
-
-            //var request = new GetItemRequest
-            //{
-            //    TableName = _tableName,
-            //    Key = new Dictionary<string, AttributeValue>()
-            //{
-            //    { "id", new AttributeValue {
-            //          S = id
-            //      } }
-            //},
-            //    ProjectionExpression = "id, status, result, board, waiting_for_player, create_utc, create_utc, update_utc",
-            //    ConsistentRead = true
-            //};
-
-            //var response = await _dbClient.GetItemAsync(request, cancellationToken);
-
-            //if (response.IsItemSet)
-            //{
-
-            //    var r = response.Item;
-            //    var g = new GameEntity();
-            //    g.Id = r["id"].S;
-            //    g.Status = r["status"].S;
-            //    g.Result = r["result"].S;
-            //    g.WaitingForPlayer = r["waiting_for_player"].S;
-
-            //    g.Board = JsonConvert.DeserializeObject<string[,]>(r["board"].AsString());
-
-            //    var create_utc_str = r["create_utc"].S;
-            //    if (DateTimeOffset.TryParse(create_utc_str, out DateTimeOffset createdUtc))
-            //    {
-            //        g.CreatedUtc = createdUtc;
-            //    }
-
-            //    var updated_utc_str = r["update_utc"].S;
-            //    if (DateTimeOffset.TryParse(updated_utc_str, out DateTimeOffset updatedUtc))
-            //    {
-            //        g.LastUpdatedUtc = updatedUtc;
-            //    }
-            //    return g;
-            //}
-            //else
-            //{
-            //    return null;
-            //}
 
 
         }

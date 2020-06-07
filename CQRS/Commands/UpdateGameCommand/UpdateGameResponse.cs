@@ -10,7 +10,7 @@ namespace tictactoe_service.CQRS.Commands.UpdateGameCommand
 {
     public class UpdateGameResponse:BaseResponse
     {
-        [JsonProperty("game")]
+        [JsonProperty("game", NullValueHandling = NullValueHandling.Ignore)]
         public GameEntity Game { get; set; }
     }
 }

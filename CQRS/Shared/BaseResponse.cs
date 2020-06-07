@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Amazon.Lambda.APIGatewayEvents;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,5 +46,44 @@ namespace tictactoe_service.CQRS.Shared
             return jsonResult;
         }
 
+        /// <summary>
+        /// Helper to provide BaseResponse as APIGatewayProxyResponse
+        /// </summary>
+        /// <param name="overrideStatusCode"></param>
+        /// <returns></returns>
+        public APIGatewayProxyResponse APIGatewayResponse(System.Net.HttpStatusCode? overrideStatusCode = null)
+        {
+            string body = JsonConvert.SerializeObject(this);
+            int statusCode;
+
+            if (overrideStatusCode.HasValue)
+            {
+                statusCode = (int)(overrideStatusCode.Value);
+            }
+            else
+            {
+                if (this.IsNotFound.HasValue && this.IsNotFound.Value)
+                {
+                    statusCode = (int)System.Net.HttpStatusCode.NotFound;
+                }
+                else
+                {
+                    statusCode = (int)(this.IsValid ? System.Net.HttpStatusCode.OK : System.Net.HttpStatusCode.BadRequest);
+                }
+            }
+
+            var response = new APIGatewayProxyResponse
+            {
+                StatusCode = statusCode,
+                Body = body,
+                Headers = new Dictionary<string, string>
+                    {
+                        { "Content-Type", "application/json" },
+                        { "Access-Control-Allow-Origin", "*" }
+                    }
+            };
+
+            return response;
+        }
     }
 }

@@ -81,13 +81,20 @@ DynamoDB is used for data. It has following attributes:
     - string update_utc
     - string waiting_for_player
 
+DynamoDB will be provisioned on deployment.
 
 
 ## Configuration 
 
-Assemed that you have DynamoDB instance running with one parttion key "id" as string
+Configue values for DynamoDB in serverless.yml file:
 
-Configure settings for DynamoDB in appsettings file: 
+```  
+environment:
+    Dynamo_AccessKey: "<your-key>"
+    Dynamo_SecretKey: "<your-secret>"
+```
+
+Configure settings in appsettings file: 
 ``` 
 "AWS": {
     "Region": "us-west-1",
@@ -97,10 +104,18 @@ Configure settings for DynamoDB in appsettings file:
   }
 ```
 
+OR provide env variables with CLI:
+
+```
+export AWS_ACCESS_KEY_ID=<your-key>
+export AWS_SECRET_ACCESS_KEY=<your-secret>
+```
+
 
 ## Run Locally:
 
 ```
+sh build.sh 
 dotnet build
 dotnet run
 ```
@@ -114,4 +129,24 @@ Postman collection is provided "tictactoe.postman_collection.json"
 
 Note: when new game is created, id should be used in subsequent requests.
 
+
+## Deploy
+
+```
+sh build.sh 
+sls deploy
+```
+
+Output:
+``` 
+...
+endpoints:
+  GET - https://<custom-url-id>.execute-api.us-west-1.amazonaws.com/dev/games
+  GET - https://<custom-url-id>.execute-api.us-west-1.amazonaws.com/dev/games/{id}
+  POST - https://<custom-url-id>.execute-api.us-west-1.amazonaws.com/dev/games
+  PUT - https://<custom-url-id>.execute-api.us-west-1.amazonaws.com/dev/games/{id}
+....
+```
+
+Use postman for testing
 
